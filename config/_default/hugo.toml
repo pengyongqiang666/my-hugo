@@ -7,6 +7,7 @@ baseURL = "https://pengyongqiang666.github.io/my-hugo"
 defaultContentLanguage = "zh-cn"
 languageCode = "zh-cn"
 disableLanguages = ["en", "it", "ja"] # 只启用中文
+title = "彭永强的技术博客"
 
 # pluralizeListTitles = "true" # hugo function useful for non-english languages, find out more in  https://gohugo.io/getting-started/configuration/#pluralizelisttitles
 
@@ -73,3 +74,17 @@ googleAnalytics = "G-PEDMYR1V0K"
 
 # 中文博客配置优化
 # 由于只支持中文，移除了多语言相关的segments配置
+
+# SEO优化配置
+[params]
+  author = "彭永强"
+  keywords = ["Java开发", "Kubernetes", "容器技术", "Go语言", "AI技术", "软件开发", "技术博客", "云原生"]
+  
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    lineNos = true
+    style = "github"
+    tabWidth = 2

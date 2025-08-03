@@ -1,0 +1,100 @@
+---
+alwaysApply: true
+description: Hugo博客自动化构建检查和开发工作流规范
+---
+
+# Hugo博客自动化工作流规范
+
+## 🚀 自动化检查系统
+
+### 构建检查脚本
+主要检查脚本位于 [scripts/check-build.sh](mdc:scripts/check-build.sh)，提供完整的构建验证功能。
+
+### NPM脚本命令
+项目配置了完整的NPM脚本系统，详见 [package.json](mdc:package.json)：
+
+```bash
+# 🔍 核心开发命令
+npm run dev          # 启动开发服务器 (hugo server -D)
+npm run build        # 生产环境构建 (hugo --gc --minify)
+npm run check        # 完整构建检查 (推荐每次修改后使用)
+npm run check-dev    # 检查 + 启动开发服务器
+
+# 📝 内容管理命令  
+npm run new-post     # 创建新文章 (hugo new posts/)
+npm run clean        # 清理构建文件
+npm run deploy       # 部署准备
+
+# 🔧 维护命令
+npm run setup        # 初始化子模块
+```
+
+## ⚠️ 强制检查规则
+
+### 每次修改后必须执行
+```bash
+npm run check
+```
+
+## 📝 内容创建工作流
+
+### 新文章创建流程
+1. 使用模板创建：`npm run new-post 文章标题`
+2. 文章模板基于 [archetypes/posts.md](mdc:archetypes/posts.md)
+3. 严格按照 [blog-post-format.mdc](mdc:.cursor/rules/blog-post-format.mdc) 规范写作
+4. 完成后运行 `npm run check` 验证
+
+### 文章组织结构
+- 📁 `content/posts/article-name/` - 每篇文章独立目录
+- 📄 `index.md` - 文章内容
+- 🖼️ `featured.svg` - 特色图片
+- 📊 其他资源文件（图表、演示文件等）
+
+## 🎯 开发环境要求
+
+### 必需工具版本
+- **Hugo**: >= 0.140.0 (Extended版本)
+- **Node.js**: >= 14.0.0
+- **Git**: 最新版本
+
+### 环境检查
+开发前确保：
+```bash
+hugo version    # 检查Hugo版本
+node --version  # 检查Node.js版本
+npm --version   # 检查NPM版本
+```
+
+### 紧急修复流程
+遇到构建错误时：
+```bash
+# 1. 清理构建缓存
+npm run clean
+
+# 2. 重新检查
+npm run check
+
+# 3. 如果仍有问题，检查最近的修改
+git status
+git diff
+
+# 4. 必要时回滚到上次工作状态
+git checkout -- 有问题的文件
+```
+
+## 🔄 版本控制集成
+
+### Git工作流
+1. 📝 **功能开发在分支进行**
+2. ✅ **合并前必须通过 `npm run check`**
+3. 📋 **提交信息使用中文描述**
+4. 🏷️ **重要版本打标签**
+
+### 提交前检查清单
+- [ ] 运行 `npm run check` 通过
+- [ ] 本地预览 `npm run dev` 正常
+- [ ] 新增内容符合规范
+- [ ] 配置文件语法正确
+- [ ] 没有未提交的临时文件
+
+此规则确保Hugo博客项目的自动化构建检查和标准化开发工作流，通过强制执行检查步骤来预防构建错误。

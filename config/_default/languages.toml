@@ -1,0 +1,32 @@
+# -- Language Configuration --
+# The default language for this Hugo site.
+# Refer to the theme docs for more details about each of these parameters.
+# https://blowfish.page/docs/configuration/#language-and-i18n
+
+[zh-cn]
+  languageCode = "zh-CN"
+  languageName = "简体中文"
+  displayName = "简体中文"
+  htmlCode = "zh-CN"
+  weight = 1
+  rtl = false
+
+  title = "彭永强的技术博客"
+  description = "彭永强的个人技术博客 - 分享Java开发、Kubernetes、容器技术、Go语言和AI相关的技术思考与实践经验。多思考，为防止小年痴呆！"
+  copyright = "版权所有 © 2025 彭永强"
+
+  dateFormat = "2006年1月2日"
+  
+  [zh-cn.params]
+    displayName = "简体中文"
+    isoCode = "zh-CN"
+    
+  [zh-cn.author]
+    name = "彭永强"
+    headline = "软件开发工程师 & 技术思考者"
+    bio = "专注于Java开发、容器化技术和AI领域。相信多思考能让我们保持敏锐，通过技术分享来防止思维僵化。"
+    # image = "img/author.png"  # 暂时注释掉，直到添加实际头像文件
+    links = [
+      { email = "mailto:pengyongqiang888@gmail.com" },
+      { github = "https://github.com/pengyongqiang666" },
+    ]

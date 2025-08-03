@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>欢迎来到我的Hugo博客！ :tada: on </title>
+    <title>欢迎来到彭永强的技术博客！ :tada: on 彭永强的技术博客</title>
     <link>http://localhost:1313/my-hugo/</link>
-    <description>Recent content in 欢迎来到我的Hugo博客！ :tada: on </description>
+    <description>Recent content in 欢迎来到彭永强的技术博客！ :tada: on 彭永强的技术博客</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>zh-cn</language>
-    <copyright>© 2025 博主</copyright>
+    <language>zh-CN</language>
+    <copyright>© 2025 彭永强</copyright>
     <lastBuildDate>Sat, 02 Aug 2025 21:30:00 +0800</lastBuildDate><atom:link href="http://localhost:1313/my-hugo/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
@@ -34,16 +34,35 @@
       <pubDate>Sat, 02 Aug 2025 19:26:25 +0800</pubDate>
       
       <guid>http://localhost:1313/my-hugo/about/</guid>
-      <description>&lt;h2 class=&#34;relative group&#34;&gt;欢迎来到我的博客！ 
-    &lt;div id=&#34;欢迎来到我的博客&#34; class=&#34;anchor&#34;&gt;&lt;/div&gt;
+      <description>&lt;h2 class=&#34;relative group&#34;&gt;👋 你好，我是彭永强 
+    &lt;div id=&#34;-你好我是彭永强&#34; class=&#34;anchor&#34;&gt;&lt;/div&gt;
     
     &lt;span
         class=&#34;absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100&#34;&gt;
-        &lt;a class=&#34;group-hover:text-primary-300 dark:group-hover:text-neutral-700 !no-underline&#34; href=&#34;#%e6%ac%a2%e8%bf%8e%e6%9d%a5%e5%88%b0%e6%88%91%e7%9a%84%e5%8d%9a%e5%ae%a2&#34; aria-label=&#34;锚点&#34;&gt;#&lt;/a&gt;
+        &lt;a class=&#34;group-hover:text-primary-300 dark:group-hover:text-neutral-700 !no-underline&#34; href=&#34;#-%e4%bd%a0%e5%a5%bd%e6%88%91%e6%98%af%e5%bd%ad%e6%b0%b8%e5%bc%ba&#34; aria-label=&#34;锚点&#34;&gt;#&lt;/a&gt;
     &lt;/span&gt;        
     
 &lt;/h2&gt;
-&lt;p&gt;你好！欢迎访问我的个人博客。这里是我分享生活感悟、技术心得和学习笔记的地方。&lt;/p&gt;</description>
+&lt;p&gt;欢迎来到我的技术博客！我是一名软件开发工程师，专注于后端开发和云原生技术。&lt;/p&gt;</description>
+      
+    </item>
+    
+    <item>
+      <title>联系我</title>
+      <link>http://localhost:1313/my-hugo/contact/</link>
+      <pubDate>Wed, 15 Jan 2025 10:30:00 +0800</pubDate>
+      
+      <guid>http://localhost:1313/my-hugo/contact/</guid>
+      <description>&lt;h2 class=&#34;relative group&#34;&gt;📬 联系方式 
+    &lt;div id=&#34;-联系方式&#34; class=&#34;anchor&#34;&gt;&lt;/div&gt;
+    
+    &lt;span
+        class=&#34;absolute top-0 w-6 transition-opacity opacity-0 ltr:-left-6 rtl:-right-6 not-prose group-hover:opacity-100&#34;&gt;
+        &lt;a class=&#34;group-hover:text-primary-300 dark:group-hover:text-neutral-700 !no-underline&#34; href=&#34;#-%e8%81%94%e7%b3%bb%e6%96%b9%e5%bc%8f&#34; aria-label=&#34;锚点&#34;&gt;#&lt;/a&gt;
+    &lt;/span&gt;        
+    
+&lt;/h2&gt;
+&lt;p&gt;很高兴能与你建立联系！如果你有任何技术问题、合作想法或者只是想聊聊技术，都欢迎与我联系。&lt;/p&gt;</description>
       
     </item>
     

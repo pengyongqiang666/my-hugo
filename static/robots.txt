@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://pengyongqiang666.github.io/my-hugo/sitemap.xml
+
+# 优化爬虫抓取
+Crawl-delay: 1
+
+# 禁止访问的路径
+Disallow: /admin/
+Disallow: /*.json$
+Disallow: /search/
+
+# 允许访问重要页面
+Allow: /posts/
+Allow: /about/
+Allow: /projects/
+Allow: /contact/
+Allow: /tags/
+Allow: /categories/

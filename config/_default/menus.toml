@@ -38,7 +38,12 @@
 [[main]]
   name = "关于"
   pageRef = "about"
-  weight = 40
+  weight = 35
+
+[[main]]
+  name = "联系"
+  pageRef = "contact"
+  weight = 50
 
 ## RSS 订阅
 #[[main]]
@@ -75,3 +80,8 @@
    name = "关于"
    pageRef = "about"
    weight = 30
+
+ [[footer]]
+   name = "联系"
+   pageRef = "contact"
+   weight = 40

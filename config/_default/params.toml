@@ -10,8 +10,8 @@ defaultAppearance = "dark" # valid options: light or dark
 autoSwitchAppearance = true
 
 # 站点基本信息  
-title = "我的个人博客"
-description = "基于Hugo和Blowfish主题构建的个人技术博客，分享编程经验、技术心得和学习笔记。"
+title = "彭永强的技术博客"
+description = "彭永强的个人技术博客 - 分享Java开发、Kubernetes、容器技术、Go语言和AI相关的技术思考与实践经验。多思考，为防止小年痴呆！"
 dateFormat = "2006年1月2日"
 
 # Logo配置
@@ -183,10 +183,12 @@ fingerprintAlgorithm = "sha512" # Valid values are "sha512" (default), "sha384",
 
 # 作者信息配置
 [author]
-  name = "博主"
-  headline = "全栈开发者 & 技术写作者"
-  bio = "热爱技术，专注于Web开发、云计算和开源项目。通过这个博客分享我的技术见解和项目经验。"
+  name = "彭永强"
+  headline = "软件开发工程师 & 技术思考者"
+  bio = "专注于Java开发、容器化技术和AI领域。相信多思考能让我们保持敏锐，通过技术分享来防止思维僵化。"
+  # image = "img/author.png"  # 暂时注释掉，直到添加实际头像文件
   links = [
+    { email = "mailto:pengyongqiang888@gmail.com" },
     { github = "https://github.com/pengyongqiang666" },
   ]
 

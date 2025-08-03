@@ -1,0 +1,39 @@
+{
+  "name": "pengyongqiang-blog",
+  "version": "1.0.0",
+  "description": "彭永强的个人技术博客 - 基于Hugo和Blowfish主题",
+  "scripts": {
+    "dev": "hugo server -D --bind 0.0.0.0 --port 1313",
+    "build": "hugo --gc --minify",
+    "check": "./scripts/check-build.sh",
+    "check-dev": "./scripts/check-build.sh --dev",
+    "clean": "rm -rf public resources",
+    "new-post": "hugo new posts/",
+    "deploy": "npm run build && echo 'Ready for deployment!'",
+    "setup": "git submodule update --init --recursive"
+  },
+  "keywords": [
+    "hugo",
+    "blog",
+    "技术博客",
+    "java",
+    "kubernetes",
+    "golang",
+    "ai"
+  ],
+  "author": "彭永强 <pengyongqiang888@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pengyongqiang666/my-hugo.git"
+  },
+  "homepage": "https://pengyongqiang666.github.io/my-hugo",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "hugo": {
+    "version": ">=0.140.0",
+    "theme": "blowfish"
+  }
+}
