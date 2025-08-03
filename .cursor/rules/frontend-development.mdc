@@ -1,0 +1,186 @@
+---
+globs: *.js,*.css,*.html,layouts/**/*
+description: 前端开发规范
+---
+
+# 前端开发规范
+
+## JavaScript 开发规范
+
+### 代码风格
+```javascript
+// 使用 const 和 let，避免使用 var
+const API_BASE_URL = 'https://api.example.com';
+let currentUser = null;
+
+// 函数命名使用驼峰命名法，并添加中文注释
+function getUserProfile(userId) {
+    // 验证用户ID参数
+    if (!userId || typeof userId !== 'string') {
+        throw new Error('用户ID参数无效');
+    }
+    
+    // 发送API请求获取用户信息
+    return fetch(`${API_BASE_URL}/users/${userId}`)
+        .then(response => {
+            // 检查响应状态
+            if (!response.ok) {
+                throw new Error('获取用户信息失败');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            // 错误处理和日志记录
+            console.error('用户信息获取错误:', error);
+            throw error;
+        });
+}
+```
+
+### 错误处理
+- 使用 try-catch 处理异步操作
+- 提供有意义的错误消息
+- 记录错误日志便于调试
+
+## CSS 开发规范
+
+### 命名约定
+```css
+/* 使用BEM命名方法，配合中文注释 */
+
+/* 博客文章卡片组件 */
+.post-card {
+    /* 基础样式设置 */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+/* 文章卡片标题 */
+.post-card__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* 文章卡片悬停状态 */
+.post-card--hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+```
+
+### 响应式设计
+```css
+/* 移动端优先的响应式设计 */
+.container {
+    /* 移动端样式 */
+    padding: 1rem;
+    max-width: 100%;
+}
+
+/* 平板端适配 */
+@media (min-width: 768px) {
+    .container {
+        padding: 2rem;
+        max-width: 768px;
+        margin: 0 auto;
+    }
+}
+
+/* 桌面端适配 */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1024px;
+        padding: 3rem;
+    }
+}
+```
+
+## Hugo模板开发
+
+### 模板结构
+```html
+<!-- layouts/partials/post-card.html -->
+<!-- 文章卡片组件模板 -->
+<article class="post-card">
+    <!-- 文章特色图片 -->
+    {{ if .Params.featured }}
+    <div class="post-card__image">
+        <img src="{{ .Params.featured }}" alt="{{ .Title }}" loading="lazy">
+    </div>
+    {{ end }}
+    
+    <!-- 文章内容区域 -->
+    <div class="post-card__content">
+        <!-- 文章标题 -->
+        <h2 class="post-card__title">
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+        
+        <!-- 文章摘要 -->
+        <p class="post-card__summary">{{ .Summary }}</p>
+        
+        <!-- 文章元信息 -->
+        <div class="post-card__meta">
+            <time datetime="{{ .Date.Format "2006-01-02" }}">
+                {{ .Date.Format "2006年01月02日" }}
+            </time>
+            
+            <!-- 文章标签 -->
+            {{ if .Params.tags }}
+            <div class="post-card__tags">
+                {{ range .Params.tags }}
+                <span class="tag">{{ . }}</span>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</article>
+```
+
+### 数据处理
+```html
+<!-- 文章列表页面逻辑 -->
+{{ $posts := where site.RegularPages "Type" "posts" }}
+{{ $posts = $posts | first 10 }}
+
+<!-- 遍历文章列表 -->
+<div class="posts-grid">
+    {{ range $posts }}
+        <!-- 引用文章卡片组件 -->
+        {{ partial "post-card.html" . }}
+    {{ end }}
+</div>
+
+<!-- 分页导航 -->
+{{ if .Paginator.HasPrev }}
+    <a href="{{ .Paginator.Prev.URL }}" class="pagination__prev">
+        ← 上一页
+    </a>
+{{ end }}
+
+{{ if .Paginator.HasNext }}
+    <a href="{{ .Paginator.Next.URL }}" class="pagination__next">
+        下一页 →
+    </a>
+{{ end }}
+```
+
+## 性能优化原则
+
+### 图片优化
+- 使用适当的图片格式（WebP、SVG）
+- 实现懒加载减少初始加载时间
+- 提供不同尺寸的响应式图片
+
+### JavaScript优化
+- 按需加载脚本文件
+- 使用CDN加速常用库
+- 压缩和合并文件
+
+### CSS优化
+- 移除未使用的CSS规则
+- 使用CSS变量提高可维护性
+- 合理使用CSS预处理器

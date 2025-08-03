@@ -1,0 +1,44 @@
+{{/*
+虚拟窗口Shortcode - Virtual Window Shortcode
+使用方法: {{< virtual-window id="my-window" title="窗口标题" icon="🎯" url="/test.html" >}}
+
+参数说明:
+- id: 窗口唯一标识符 (必需)
+- title: 窗口标题 (默认: "虚拟窗口")
+- icon: 窗口图标 (默认: "🪟")
+- url: 嵌入的页面URL (必需)
+- width: 初始宽度 (默认: "80%")
+- height: 初始高度 (默认: "70%")
+- minWidth: 最小宽度 (默认: "400px")
+- minHeight: 最小高度 (默认: "300px")
+- buttonText: 按钮文字 (默认: "🪟 打开虚拟窗口")
+- buttonStyle: 按钮样式类 (默认: "virtual-window-btn-default")
+- showBackdrop: 是否显示背景遮罩 (默认: true)
+*/}}
+
+{{ $id := .Get "id" | default (printf "virtual-window-%d" now.Unix) }}
+{{ $title := .Get "title" | default "虚拟窗口" }}
+{{ $icon := .Get "icon" | default "🪟" }}
+{{ $url := .Get "url" }}
+{{ $width := .Get "width" | default "80%" }}
+{{ $height := .Get "height" | default "70%" }}
+{{ $minWidth := .Get "minWidth" | default "400px" }}
+{{ $minHeight := .Get "minHeight" | default "300px" }}
+{{ $buttonText := .Get "buttonText" | default "🪟 打开虚拟窗口" }}
+{{ $buttonStyle := .Get "buttonStyle" | default "virtual-window-btn-default" }}
+{{ $showBackdrop := .Get "showBackdrop" | default "true" }}
+
+<!-- 调用虚拟窗口partial组件 -->
+{{ partial "virtual-window.html" (dict 
+    "id" $id
+    "title" $title
+    "icon" $icon
+    "url" $url
+    "width" $width
+    "height" $height
+    "minWidth" $minWidth
+    "minHeight" $minHeight
+    "buttonText" $buttonText
+    "buttonStyle" $buttonStyle
+    "showBackdrop" ($showBackdrop | eq "true")
+) }}

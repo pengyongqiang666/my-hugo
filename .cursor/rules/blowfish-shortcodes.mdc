@@ -1,0 +1,391 @@
+---
+description: Blowfish主题短代码组件使用参考
+---
+
+# Blowfish 主题短代码组件使用指南
+
+Hugo Blowfish 主题提供了丰富的短代码组件，以下是常用组件的使用方法和示例。
+
+## 🚨 提醒框组件 (Alert)
+
+用于显示重要信息的样式化消息框：
+
+```md
+{{< alert >}}
+**警告！** 这个操作不可逆转！
+{{< /alert >}}
+
+{{< alert "twitter" >}}
+不要忘记[关注我](https://twitter.com/username)的推特。
+{{< /alert >}}
+
+{{< alert icon="fire" cardColor="#e63946" iconColor="#1d3557" textColor="#f1faee" >}}
+这是一个错误提示！
+{{< /alert >}}
+```
+
+参数说明：
+- `icon`: 可选，左侧显示的图标
+- `iconColor`: 可选，图标颜色
+- `cardColor`: 可选，卡片背景色
+- `textColor`: 可选，文字颜色
+
+## 🎯 按钮组件 (Button)
+
+创建突出显示的行动按钮：
+
+```md
+{{< button href="#button" target="_self" >}}
+点击这里
+{{< /button >}}
+```
+
+参数说明：
+- `href`: 链接地址
+- `target`: 链接目标
+- `rel`: 链接关系
+
+## 📊 图表组件 (Chart)
+
+使用 Chart.js 创建各种图表：
+
+```md
+{{< chart >}}
+type: 'bar',
+data: {
+  labels: ['苹果', '蓝莓', '香蕉', '柠檬', '橙子'],
+  datasets: [{
+    label: '投票数',
+    data: [12, 19, 3, 5, 3],
+  }]
+}
+{{< /chart >}}
+```
+
+## 🖼️ 图片组件 (Figure)
+
+增强的图片显示功能：
+
+```md
+{{< figure
+    src="abstract.jpg"
+    alt="抽象紫色艺术作品"
+    caption="照片来源: [Jr Korpa](https://unsplash.com/@jrkorpa)"
+>}}
+
+<!-- 或使用标准 Markdown 语法 -->
+![抽象紫色艺术作品](abstract.jpg "照片来源: Jr Korpa")
+```
+
+参数说明：
+- `src`: 图片路径或URL（必需）
+- `alt`: 替代文字描述
+- `caption`: 图片说明文字
+- `class`: 额外的CSS类
+- `href`: 图片链接地址
+- `target`: 链接目标
+- `nozoom`: 禁用缩放功能
+
+## 🖼️ 图片画廊 (Gallery)
+
+展示多张图片的响应式画廊：
+
+```md
+{{< gallery >}}
+  <img src="gallery/01.jpg" class="grid-w33" />
+  <img src="gallery/02.jpg" class="grid-w33" />
+  <img src="gallery/03.jpg" class="grid-w33" />
+  <img src="gallery/04.jpg" class="grid-w33" />
+{{< /gallery >}}
+
+<!-- 响应式画廊 -->
+{{< gallery >}}
+  <img src="gallery/01.jpg" class="grid-w50 md:grid-w33 xl:grid-w25" />
+  <img src="gallery/02.jpg" class="grid-w50 md:grid-w33 xl:grid-w25" />
+{{< /gallery >}}
+```
+
+宽度类说明：
+- `grid-w33`: 33% 宽度
+- `grid-w50`: 50% 宽度
+- `grid-w66`: 66% 宽度
+- 支持响应式前缀：`md:` `xl:` 等
+
+## 🎠 轮播图 (Carousel)
+
+交互式图片轮播展示：
+
+```md
+{{< carousel images="gallery/*" aspectRatio="16-9" interval="2000" >}}
+
+{{< carousel images="{image1.jpg,image2.jpg,image3.jpg}" aspectRatio="21-9" >}}
+```
+
+参数说明：
+- `images`: 图片匹配模式或列表（必需）
+- `aspectRatio`: 宽高比 (`16-9`, `21-9`, `32-9`)
+- `interval`: 自动切换间隔（毫秒）
+
+## 🔧 图标组件 (Icon)
+
+显示SVG图标：
+
+```md
+{{< icon "github" >}}
+{{< icon "twitter" >}}
+{{< icon "star" >}}
+```
+
+## 📐 数学公式 (KaTeX)
+
+渲染数学表达式：
+
+```md
+{{< katex >}}
+\(f(a,b,c) = (a^2+b^2+c^2)^3\)
+
+$$\sum_{i=1}^{n} x_i = x_1 + x_2 + \cdots + x_n$$
+{{< /katex >}}
+```
+
+## 📊 流程图 (Mermaid)
+
+创建图表和流程图：
+
+```md
+{{< mermaid >}}
+graph LR;
+A[开始]-->B[处理];
+B-->C[结束]
+{{< /mermaid >}}
+
+{{< mermaid >}}
+sequenceDiagram
+    participant 用户
+    participant 系统
+    用户->>系统: 发送请求
+    系统-->>用户: 返回响应
+{{< /mermaid >}}
+```
+
+## 🎨 徽章组件 (Badge)
+
+显示元数据标签：
+
+```md
+{{< badge >}}
+新文章！
+{{< /badge >}}
+```
+
+## 💡 引言组件 (Lead)
+
+突出显示文章开头的重要内容：
+
+```md
+{{< lead >}}
+当生活给你柠檬时，就做柠檬水吧。
+{{< /lead >}}
+```
+
+## 📝 关键词组件 (Keyword)
+
+突出显示重要技能或关键词：
+
+```md
+{{< keyword >}} *重要* 技能 {{< /keyword >}}
+
+{{< keywordList >}}
+{{< keyword icon="github" >}} GitHub 技能 {{< /keyword >}}
+{{< keyword icon="code" >}} **编程** 能力 {{< /keyword >}}
+{{< /keywordList >}}
+```
+
+## 📋 文章列表 (List)
+
+显示最近文章列表：
+
+```md
+{{< list limit=5 >}}
+
+{{< list title="示例文章" cardView=true limit=6 where="Type" value="sample" >}}
+```
+
+参数说明：
+- `limit`: 文章数量限制（必需）
+- `title`: 列表标题
+- `cardView`: 启用卡片视图
+- `where`: 过滤字段
+- `value`: 过滤值
+
+## ⏰ 时间线 (Timeline)
+
+创建可视化时间线：
+
+```md
+{{< timeline >}}
+
+{{< timelineItem icon="github" header="项目开始" badge="2023年" subheader="重要里程碑" >}}
+项目启动，开始开发工作。
+{{< /timelineItem >}}
+
+{{< timelineItem icon="code" header="功能完成" badge="2024年" subheader="开发阶段" >}}
+主要功能开发完成。
+{{< /timelineItem >}}
+
+{{< /timeline >}}
+```
+
+参数说明：
+- `icon`: 时间线图标
+- `header`: 主标题
+- `badge`: 右上角徽章文字
+- `subheader`: 副标题
+
+## 🎬 打字机效果 (TypeIt)
+
+创建打字机动画效果：
+
+```md
+{{< typeit >}}
+欢迎来到我的博客
+{{< /typeit >}}
+
+{{< typeit tag=h1 lifeLike=true >}}
+这是一个
+动态标题效果
+{{< /typeit >}}
+
+{{< typeit tag=h3 speed=50 breakLines=false loop=true >}}
+第一行文字
+第二行文字
+第三行文字
+{{< /typeit >}}
+```
+
+参数说明：
+- `tag`: HTML标签
+- `speed`: 打字速度（毫秒）
+- `lifeLike`: 模拟真实打字节奏
+- `breakLines`: 是否换行显示
+- `loop`: 是否循环播放
+- `startDelay`: 开始延迟时间
+
+## 🎥 YouTube 嵌入 (YouTubeLite)
+
+轻量级YouTube视频嵌入：
+
+```md
+{{< youtubeLite id="SgXhGb-7QbU" label="演示视频" >}}
+
+{{< youtubeLite id="SgXhGb-7QbU" label="演示视频" params="start=130" >}}
+
+{{< youtubeLite id="SgXhGb-7QbU" label="演示视频" params="start=130&end=140&controls=0" >}}
+```
+
+参数说明：
+- `id`: YouTube视频ID（必需）
+- `label`: 视频标签
+- `params`: 播放参数（开始时间、结束时间等）
+
+## 🎨 色彩样本 (Swatches)
+
+显示颜色样本：
+
+```md
+{{< swatches "#64748b" "#3b82f6" "#06b6d4" >}}
+```
+
+## 🔗 GitHub 卡片
+
+显示GitHub仓库信息：
+
+```md
+{{< github repo="nunocoracao/blowfish" showThumbnail=true >}}
+```
+
+## 📁 代码导入 (Code Importer)
+
+从外部源导入代码：
+
+```md
+{{< codeimporter url="https://raw.githubusercontent.com/user/repo/main/file.js" type="javascript" >}}
+
+{{< codeimporter url="https://raw.githubusercontent.com/user/repo/main/config.toml" type="toml" startLine="11" endLine="18" >}}
+```
+
+## 📝 Markdown 导入
+
+从外部源导入Markdown内容：
+
+```md
+{{< mdimporter url="https://raw.githubusercontent.com/user/repo/master/README.md" >}}
+```
+
+## 🪟 虚拟窗口 (Virtual Window)
+
+创建可打开的虚拟窗口演示：
+
+```md
+{{< virtual-window 
+    id="demo-window" 
+    title="演示窗口"
+    icon="🪟"
+    url="demo.html" 
+    buttonText="🪟 打开演示" 
+    buttonStyle="virtual-window-btn-primary"
+    width="80%"
+    height="70%"
+>}}
+```
+
+参数说明：
+- `id`: 窗口唯一标识符
+- `title`: 窗口标题
+- `icon`: 按钮图标
+- `url`: 要加载的页面URL
+- `buttonText`: 按钮文字
+- `buttonStyle`: 按钮样式类
+- `width`: 窗口宽度
+- `height`: 窗口高度
+
+## 使用注意事项
+
+1. **中文内容**: 所有文本内容使用中文
+2. **路径引用**: 图片和资源使用相对路径
+3. **响应式设计**: 合理使用响应式类名
+4. **语义化**: 选择合适的组件表达内容含义
+5. **性能优化**: 大型媒体文件考虑使用CDN或压缩
+
+## 常用组合模式
+
+### 文章介绍区块
+```md
+{{< lead >}}
+这篇文章将深入探讨人工智能在现代软件开发中的应用。
+{{< /lead >}}
+
+{{< alert "info" >}}
+本文需要一定的编程基础知识。
+{{< /alert >}}
+```
+
+### 技能展示
+```md
+{{< keywordList >}}
+{{< keyword icon="code" >}} **Python** 编程 {{< /keyword >}}
+{{< keyword icon="github" >}} **Git** 版本控制 {{< /keyword >}}
+{{< keyword icon="star" >}} **机器学习** {{< /keyword >}}
+{{< /keywordList >}}
+```
+
+### 项目展示
+```md
+{{< github repo="username/project" showThumbnail=true >}}
+
+{{< button href="https://project-demo.com" target="_blank" >}}
+查看在线演示
+{{< /button >}}
+```
+
+此规则提供了Blowfish主题中最常用的短代码组件参考，帮助快速创建丰富的博客内容。

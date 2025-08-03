@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互式RAG原理演示平台 (UI优化版)</title>
+    <style>
+        :root {
+            --node-font-size: 12px; /* CSS variable for font size */
+        }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #000;
+            color: #e0e0e0;
+            display: flex;
+            height: 100vh;
+        }
+        #controls-panel {
+            width: 380px;
+            flex-shrink: 0;
+            background-color: rgba(10, 10, 20, 0.8);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #2a2a4a;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .control-section {
+            background-color: rgba(30, 30, 50, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(100, 100, 220, 0.2);
+            transition: all 0.3s ease;
+        }
+        .control-section:hover {
+            border-color: rgba(150, 150, 255, 0.5);
+            box-shadow: 0 0 15px rgba(100, 100, 255, 0.2);
+        }
+        h1, h2, h3 {
+            margin-top: 0;
+            color: #61dafb;
+            border-bottom: 1px solid #2a2a4a;
+            padding-bottom: 8px;
+        }
+        h1 { font-size: 1.5em; }
+        h2 { font-size: 1.2em; }
+        h3 { font-size: 1.0em; color: #e0e0e0; }
+        p, label {
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #4a4a6a;
+            background-color: #1e1e32;
+            color: #e0e0e0;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin-top: 5px;
+            background: linear-gradient(45deg, #2a2a4a, #4a4a6a);
+            border: 1px solid rgba(150, 150, 255, 0.3);
+        }
+        button:hover {
+            background: linear-gradient(45deg, #4a4a6a, #6a6a8a);
+            box-shadow: 0 0 10px rgba(100, 100, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        #retrieve-button { background: linear-gradient(45deg, #1f782c, #3aaa4a); }
+        #retrieve-button:hover { background: linear-gradient(45deg, #3aaa4a, #5fca6f); }
+        #reset-button { background-color: #dc3545; grid-column: 1 / -1; background: linear-gradient(45deg, #982c38, #c84a58); }
+        #reset-button:hover { background: linear-gradient(45deg, #c84a58, #e86a78); }
+        
+        #knowledge-base .doc-item {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        #knowledge-base .doc-item:hover {
+            background-color: rgba(100, 100, 220, 0.2);
+        }
+        #knowledge-base input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        #results-panel, #node-details {
+            font-size: 0.9em;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        #results-panel .retrieved-item, #node-details .info-item {
+            background-color: rgba(100, 100, 220, 0.1);
+            border-left: 3px solid #61dafb;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+        #node-details .info-item {
+             font-family: monospace;
+             font-size: 0.85em;
+             word-break: break-all;
+        }
+        #results-panel .augmented-prompt {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-left: 3px solid #007bff;
+            padding: 10px;
+            margin-top: 15px;
+        }
+        #results-panel .generated-answer {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 3px solid #28a745;
+            padding: 10px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        #canvas-container {
+            flex-grow: 1;
+            height: 100%;
+            position: relative;
+        }
+        canvas { display: block; }
+
+        .node-label {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: var(--node-font-size);
+            pointer-events: none;
+            max-width: 200px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        .node-label .coords {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #aaa;
+            display: block;
+            margin-top: 4px;
+        }
+        .distance-label {
+            color: #ffeb3b;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: calc(var(--node-font-size) * 0.9);
+            pointer-events: none;
+        }
+        .axis-tick-label {
+            color: #aaa;
+            font-size: 20px; /* FIX: Increased font size */
+            font-weight: bold;
+            pointer-events: none;
+        }
+        .coord-helper-label {
+            color: #fff;
+            background-color: rgba(0,0,0,0.7);
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 10px;
+            pointer-events: none;
+        }
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            width: 60%;
+        }
+    </style>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+      }
+    }
+    </script>
+
+</head>
+<body>
+
+    <div id="controls-panel">
+        <section class="control-section">
+            <h1>交互式RAG原理演示</h1>
+            <p>您可以使用鼠标自由移动、缩放、平移，或使用键盘WASD/QE键移动，并随时复位摄像头。</p>
+        </section>
+
+        <section class="control-section">
+            <h2>1. 构建知识库</h2>
+            <p>勾选你想要添加到知识库的文档：</p>
+            <div id="knowledge-base"></div>
+        </section>
+
+        <section class="control-section">
+            <h2>2. 提出问题</h2>
+            <label for="query-select">从列表中选择一个问题:</label>
+            <select id="query-select"></select>
+            <button id="retrieve-button">执行RAG流程</button>
+        </section>
+        
+        <section class="control-section">
+            <h2>显示设置</h2>
+            <div class="settings-row">
+                <label for="font-size-slider">文本大小:</label>
+                <input type="range" id="font-size-slider" min="8" max="40" value="12" step="1">
+            </div>
+            <div class="settings-row">
+                <label for="line-width-slider">线条粗细:</label>
+                <input type="range" id="line-width-slider" min="0.5" max="5" value="1" step="0.1">
+            </div>
+            <div class="settings-row">
+                <label for="camera-speed-slider">镜头速度:</label>
+                <!-- FIX: Adjusted slider range for animation speed -->
+                <input type="range" id="camera-speed-slider" min="1" max="10" value="5" step="1">
+            </div>
+        </section>
+
+        <section class="control-section">
+            <h2>控制选项</h2>
+            <div class="button-group">
+                <button id="toggle-labels-button">隐藏节点文本</button>
+                <button id="reset-camera-button">复位摄像头</button>
+            </div>
+            <button id="reset-button">重置所有</button>
+        </section>
+
+        <section class="control-section" id="results-panel-container">
+            <h2>3. RAG 过程分解</h2>
+            <div id="results-panel">
+                <p><i>结果将显示在此处...</i></p>
+            </div>
+        </section>
+        
+        <section class="control-section" id="node-info-panel">
+            <h2>节点信息</h2>
+            <div id="node-details">
+                <p><i>点击图中的一个节点以查看其详细信息。</i></p>
+            </div>
+        </section>
+        
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
+
+        // --- 预设数据 ---
+        const predefinedData = {
+            documents: [
+                { id: 'doc1', text: '太阳是太阳系的中心，是一颗恒星。', vector: [400, 400, 50] },
+                { id: 'doc2', text: '地球是一颗行星，它围绕太阳公转。', vector: [350, 300, 100] },
+                { id: 'doc3', text: '月球是地球唯一的天然卫星。', vector: [300, 250, 400] },
+                { id: 'doc4', text: '猫是一种小型的食肉哺乳动物。', vector: [-300, -200, -150] },
+                { id: 'doc5', text: '狗是人类最早驯化的动物之一。', vector: [-350, -250, -200] },
+                { id: 'doc6', text: '海洋覆盖了地球表面的71%。', vector: [100, -300, 300] }
+            ],
+            questions: [
+                { id: 'q0', text: '请选择一个问题...', vector: [0,0,0] },
+                { id: 'q1', text: '太阳系的中心是什么？', vector: [420, 420, 70] },
+                { id: 'q2', text: '哪颗行星有月亮作为卫星？', vector: [320, 280, 380] },
+                { id: 'q3', text: '人类最好的朋友是什么动物？', vector: [-330, -220, -180] },
+                { id: 'q4', text: '地球上水多还是陆地多？', vector: [120, -350, 320] }
+            ]
+        };
+
+        // --- 常量与全局变量 ---
+        const AXIS_LENGTH = 500;
+        const NUM_NEIGHBORS = 2;
+        const DOC_COLOR = 0x007bff, QUERY_COLOR = 0x28a745, NEIGHBOR_COLOR = 0xffc107, LINE_COLOR = 0xffffff, HIGHLIGHT_COLOR = 0xffffff;
+
+        let scene, camera, renderer, controls, labelRenderer;
+        let docPointsGroup, queryPoint, linesGroup, selectionHelperGroup, starField;
+        let linesToAnimate = [];
+        let hoveredObject = null;
+        let currentLineWidth = 1;
+        let focusAnimationSpeed = 0.05; // FIX: Renamed variable for clarity
+        const docPoints = new Map();
+        let selectedObject = null;
+        let labelsVisible = true;
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        const initialCameraPosition = new THREE.Vector3(AXIS_LENGTH * 1.2, AXIS_LENGTH * 1.2, AXIS_LENGTH * 1.2);
+        const initialControlsTarget = new THREE.Vector3(0, 0, 0);
+        let isResettingCamera = false;
+        let isFocusingCamera = false;
+        const focusTargetPosition = new THREE.Vector3();
+        const focusLookAtPosition = new THREE.Vector3();
+        
+        const keysPressed = {};
+
+        // --- 初始化 ---
+        function init() {
+            const container = document.getElementById('canvas-container');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x050510);
+            camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 10000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            labelRenderer = new CSS3DRenderer();
+            labelRenderer.setSize(container.clientWidth, container.clientHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            labelRenderer.domElement.style.pointerEvents = 'none';
+            container.appendChild(labelRenderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.screenSpacePanning = true;
+
+            camera.position.copy(initialCameraPosition);
+            controls.target.copy(initialControlsTarget);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+            const directionalLight = new THREE.DirectionalLight(0xabcdef, 0.9);
+            directionalLight.position.set(500, 800, 600);
+            scene.add(directionalLight);
+            
+            createFullAxes(AXIS_LENGTH);
+            const gridHelper = new THREE.GridHelper(AXIS_LENGTH * 2.5, 25, 0x00ffff, 0x444444);
+            scene.add(gridHelper);
+
+            createAxisLabels();
+            createStarfield();
+            selectionHelperGroup = new THREE.Group();
+            scene.add(selectionHelperGroup);
+
+            docPointsGroup = new THREE.Group();
+            linesGroup = new THREE.Group();
+            scene.add(docPointsGroup, linesGroup);
+
+            populateControls();
+            document.getElementById('font-size-slider').addEventListener('input', (e) => {
+                document.documentElement.style.setProperty('--node-font-size', `${e.target.value}px`);
+            });
+            document.getElementById('line-width-slider').addEventListener('input', (e) => {
+                currentLineWidth = parseFloat(e.target.value);
+                linesGroup.children.forEach(child => {
+                    if (child.isMesh && child.userData.isConnectionLine) {
+                        child.scale.set(currentLineWidth, 1, currentLineWidth);
+                    }
+                });
+            });
+            // FIX: Link slider to focus animation speed
+            document.getElementById('camera-speed-slider').addEventListener('input', (e) => {
+                focusAnimationSpeed = parseFloat(e.target.value) / 100;
+            });
+
+            document.getElementById('retrieve-button').addEventListener('click', executeRAG);
+            document.getElementById('toggle-labels-button').addEventListener('click', toggleLabels); 
+            document.getElementById('reset-camera-button').addEventListener('click', resetCamera);
+            document.getElementById('reset-button').addEventListener('click', resetScene);
+            renderer.domElement.addEventListener('click', onNodeClick, false);
+            renderer.domElement.addEventListener('mousemove', onNodeHover, false);
+            window.addEventListener('keydown', (e) => { keysPressed[e.key.toLowerCase()] = true; });
+            window.addEventListener('keyup', (e) => { keysPressed[e.key.toLowerCase()] = false; });
+            controls.addEventListener('start', () => {
+                isResettingCamera = false;
+                isFocusingCamera = false;
+            });
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        // --- UI与数据处理 ---
+
+        function populateControls() {
+            const kbContainer = document.getElementById('knowledge-base');
+            predefinedData.documents.forEach(doc => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'doc-item';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = doc.id;
+                checkbox.value = doc.id;
+                checkbox.addEventListener('change', (e) => handleDocSelection(e.target.checked, doc.id));
+                const label = document.createElement('label');
+                label.htmlFor = doc.id;
+                label.textContent = doc.text;
+                itemDiv.appendChild(checkbox);
+                itemDiv.appendChild(label);
+                kbContainer.appendChild(itemDiv);
+            });
+
+            const querySelect = document.getElementById('query-select');
+            predefinedData.questions.forEach(q => {
+                const option = document.createElement('option');
+                option.value = q.id;
+                option.textContent = q.text;
+                querySelect.appendChild(option);
+            });
+        }
+
+        function handleDocSelection(isChecked, docId) {
+            if (isChecked) {
+                const doc = predefinedData.documents.find(d => d.id === docId);
+                if (doc) {
+                    const { point, glow } = createNode(doc, DOC_COLOR, 8);
+                    point.add(glow);
+                    docPoints.set(doc.id, point);
+                    docPointsGroup.add(point);
+                    
+                    selectObject(point);
+                    focusCameraOnObject(point);
+                }
+            } else {
+                if (docPoints.has(docId)) {
+                    const pointToRemove = docPoints.get(docId);
+                    if (selectedObject === pointToRemove) {
+                        selectObject(null);
+                    }
+                    docPointsGroup.remove(pointToRemove);
+                    docPoints.delete(docId);
+                }
+            }
+        }
+
+        function executeRAG() {
+            const querySelect = document.getElementById('query-select');
+            const selectedQueryId = querySelect.value;
+            if (selectedQueryId === 'q0') { alert("请选择一个有效的问题！"); return; }
+            if (docPoints.size < NUM_NEIGHBORS) { alert(`知识库文档不足，请至少添加 ${NUM_NEIGHBORS} 篇文档！`); return; }
+
+            resetHighlights();
+
+            const queryData = predefinedData.questions.find(q => q.id === selectedQueryId);
+            const { point, glow } = createNode(queryData, QUERY_COLOR, 15);
+            queryPoint = point;
+            queryPoint.add(glow);
+            scene.add(queryPoint);
+
+            selectObject(queryPoint);
+            focusCameraOnObject(queryPoint);
+
+            findAndDisplayNearestNeighbors();
+        }
+
+        function findAndDisplayNearestNeighbors() {
+            const currentDocPoints = Array.from(docPoints.values());
+            const distances = currentDocPoints.map(docPoint => ({
+                distance: queryPoint.position.distanceTo(docPoint.position),
+                point: docPoint
+            }));
+            distances.sort((a, b) => a.distance - b.distance);
+            const neighbors = distances.slice(0, NUM_NEIGHBORS);
+            
+            highlightNeighbors(neighbors);
+            displayRAGResults(neighbors);
+        }
+
+        // --- 交互与可视化 ---
+        
+        function createNode(data, color, size) {
+            const geometry = new THREE.SphereGeometry(size, 32, 32);
+            const material = new THREE.MeshPhongMaterial({ color: color, shininess: 80 });
+            const point = new THREE.Mesh(geometry, material);
+            point.position.fromArray(data.vector);
+            point.userData = { 
+                id: data.id,
+                text: data.text, 
+                vector: data.vector,
+                originalEmissive: material.emissive.getHex()
+            };
+            const label = createNodeLabel(data.text, data.vector);
+            point.add(label);
+            
+            const glow = createGlowSprite(color, size * 4);
+            return { point, glow };
+        }
+
+        function createStarfield() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({ color: 0xaaaaaa, size: 2, transparent: true });
+            const starVertices = [];
+            for (let i = 0; i < 10000; i++) {
+                const x = THREE.MathUtils.randFloatSpread(4000);
+                const y = THREE.MathUtils.randFloatSpread(4000);
+                const z = THREE.MathUtils.randFloatSpread(4000);
+                starVertices.push(x, y, z);
+            }
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            starField = new THREE.Points(starGeometry, starMaterial);
+            scene.add(starField);
+        }
+
+        function createGlowSprite(color, size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            const gradient = context.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 0,
+                canvas.width / 2, canvas.height / 2, canvas.width / 2
+            );
+            gradient.addColorStop(0, 'rgba(255,255,255,0.8)');
+            gradient.addColorStop(0.2, 'rgba(255,255,255,0.5)');
+            gradient.addColorStop(0.6, 'rgba(255,255,255,0.1)');
+            gradient.addColorStop(1, 'rgba(255,255,255,0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, canvas.width, canvas.height);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({
+                map: texture,
+                blending: THREE.AdditiveBlending,
+                color: color,
+                transparent: true,
+                opacity: 0.7
+            });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(size, size, 1);
+            return sprite;
+        }
+
+        function createFullAxes(size) {
+            const axes = new THREE.Group();
+            const lineMaterialX = new THREE.LineBasicMaterial({ color: 0xff4444 });
+            const lineMaterialY = new THREE.LineBasicMaterial({ color: 0x44ff44 });
+            const lineMaterialZ = new THREE.LineBasicMaterial({ color: 0x4444ff });
+            const coneMaterialX = new THREE.MeshBasicMaterial({ color: 0xff4444 });
+            const coneMaterialY = new THREE.MeshBasicMaterial({ color: 0x44ff44 });
+            const coneMaterialZ = new THREE.MeshBasicMaterial({ color: 0x4444ff });
+            const coneGeom = new THREE.ConeGeometry(10, 40, 8);
+
+            const xAxis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-size, 0, 0), new THREE.Vector3(size, 0, 0)]), lineMaterialX);
+            const coneX = new THREE.Mesh(coneGeom, coneMaterialX);
+            coneX.position.x = size;
+            coneX.rotation.z = -Math.PI / 2;
+            axes.add(xAxis, coneX);
+            const yAxis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -size, 0), new THREE.Vector3(0, size, 0)]), lineMaterialY);
+            const coneY = new THREE.Mesh(coneGeom, coneMaterialY);
+            coneY.position.y = size;
+            axes.add(yAxis, coneY);
+            const zAxis = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, -size), new THREE.Vector3(0, 0, size)]), lineMaterialZ);
+            const coneZ = new THREE.Mesh(coneGeom, coneMaterialZ);
+            coneZ.position.z = size;
+            coneZ.rotation.x = Math.PI / 2;
+            axes.add(zAxis, coneZ);
+            
+            scene.add(axes);
+        }
+
+        function createAxisLabels() {
+            const tickSize = 100;
+            for (let i = -AXIS_LENGTH; i <= AXIS_LENGTH; i += tickSize) {
+                if (i === 0) continue;
+                const xDiv = document.createElement('div'); xDiv.className = 'axis-tick-label'; xDiv.textContent = i;
+                const xLabel = create3DLabel(xDiv); xLabel.position.set(i, 0, 0); scene.add(xLabel);
+                
+                const yDiv = document.createElement('div'); yDiv.className = 'axis-tick-label'; yDiv.textContent = i;
+                const yLabel = create3DLabel(yDiv); yLabel.position.set(0, i, 0); scene.add(yLabel);
+
+                const zDiv = document.createElement('div'); zDiv.className = 'axis-tick-label'; zDiv.textContent = i;
+                const zLabel = create3DLabel(zDiv); zLabel.position.set(0, 0, i); scene.add(zLabel);
+            }
+        }
+
+        function showSelectionHelper(object) {
+            clearSelectionHelper();
+            const pos = object.position;
+            const lineMaterial = new THREE.LineDashedMaterial({ color: 0xaaaaaa, dashSize: 10, gapSize: 10 });
+
+            const line1Geom = new THREE.BufferGeometry().setFromPoints([pos, new THREE.Vector3(pos.x, 0, pos.z)]);
+            const line1 = new THREE.Line(line1Geom, lineMaterial); line1.computeLineDistances(); selectionHelperGroup.add(line1);
+
+            const line2Geom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(pos.x, 0, pos.z), new THREE.Vector3(pos.x, 0, 0)]);
+            const line2 = new THREE.Line(line2Geom, lineMaterial); line2.computeLineDistances(); selectionHelperGroup.add(line2);
+
+            const line3Geom = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(pos.x, 0, pos.z), new THREE.Vector3(0, 0, pos.z)]);
+            const line3 = new THREE.Line(line3Geom, lineMaterial); line3.computeLineDistances(); selectionHelperGroup.add(line3);
+
+            const line4Geom = new THREE.BufferGeometry().setFromPoints([pos, new THREE.Vector3(0, pos.y, 0)]);
+            const line4 = new THREE.Line(line4Geom, lineMaterial); line4.computeLineDistances(); selectionHelperGroup.add(line4);
+
+            const xDiv = document.createElement('div'); xDiv.className = 'coord-helper-label'; xDiv.textContent = `x: ${pos.x.toFixed(1)}`;
+            const xLabel = create3DLabel(xDiv); xLabel.position.set(pos.x, 0, 0); selectionHelperGroup.add(xLabel);
+
+            const yDiv = document.createElement('div'); yDiv.className = 'coord-helper-label'; yDiv.textContent = `y: ${pos.y.toFixed(1)}`;
+            const yLabel = create3DLabel(yDiv); yLabel.position.set(0, pos.y, 0); selectionHelperGroup.add(yLabel);
+
+            const zDiv = document.createElement('div'); zDiv.className = 'coord-helper-label'; zDiv.textContent = `z: ${pos.z.toFixed(1)}`;
+            const zLabel = create3DLabel(zDiv); zLabel.position.set(0, 0, pos.z); selectionHelperGroup.add(zLabel);
+        }
+
+        function clearSelectionHelper() {
+             while (selectionHelperGroup.children.length > 0) {
+                selectionHelperGroup.remove(selectionHelperGroup.children[0]);
+            }
+        }
+
+        function highlightNeighbors(neighbors) {
+            neighbors.forEach(neighbor => {
+                neighbor.point.material.color.set(NEIGHBOR_COLOR);
+                neighbor.point.material.emissive.set(NEIGHBOR_COLOR);
+                neighbor.point.material.emissiveIntensity = 0.5;
+                neighbor.point.userData.originalEmissive = neighbor.point.material.emissive.getHex();
+                
+                const startPoint = queryPoint.position;
+                const endPoint = neighbor.point.position;
+                const distance = startPoint.distanceTo(endPoint);
+                const lineGeometry = new THREE.CylinderGeometry(1, 1, distance, 8);
+                const lineMaterial = new THREE.MeshBasicMaterial({ color: LINE_COLOR, transparent: true, opacity: 0.6 });
+                const line = new THREE.Mesh(lineGeometry, lineMaterial);
+                line.userData.isConnectionLine = true;
+                
+                line.position.lerpVectors(startPoint, endPoint, 0.5);
+                line.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3().subVectors(endPoint, startPoint).normalize());
+                line.scale.set(currentLineWidth, 1, currentLineWidth);
+                
+                linesGroup.add(line);
+
+                const midPoint = new THREE.Vector3().addVectors(startPoint, endPoint).multiplyScalar(0.5);
+                
+                const distanceDiv = document.createElement('div');
+                distanceDiv.className = 'distance-label';
+                distanceDiv.textContent = `距离: ${neighbor.distance.toFixed(2)}`;
+                
+                const distanceLabel = create3DLabel(distanceDiv);
+                distanceLabel.position.copy(midPoint);
+                linesGroup.add(distanceLabel);
+            });
+        }
+        
+        function create3DLabel(element) {
+            const label = new CSS3DObject(element);
+            label.scale.set(0.25, 0.25, 0.25);
+            return label;
+        }
+
+        function createNodeLabel(text, vector) {
+            const div = document.createElement('div');
+            div.className = 'node-label';
+            const textSpan = document.createElement('span');
+            textSpan.textContent = text;
+            const coordsSpan = document.createElement('span');
+            coordsSpan.className = 'coords';
+            coordsSpan.textContent = `(${vector.join(', ')})`;
+            div.appendChild(textSpan);
+            div.appendChild(coordsSpan);
+            
+            div.style.visibility = labelsVisible ? 'visible' : 'hidden';
+
+            const label = create3DLabel(div);
+            label.position.set(0, 15, 0);
+            return label;
+        }
+
+        function toggleLabels() {
+            labelsVisible = !labelsVisible;
+            const button = document.getElementById('toggle-labels-button');
+            button.textContent = labelsVisible ? '隐藏节点文本' : '显示节点文本';
+
+            scene.traverse(function(object) {
+                if (object.isCSS3DObject && (object.element.classList.contains('node-label') || object.element.classList.contains('distance-label'))) {
+                     object.element.style.visibility = labelsVisible ? 'visible' : 'hidden';
+                }
+            });
+        }
+
+        function resetCamera() {
+            isResettingCamera = true;
+            isFocusingCamera = false; 
+        }
+
+        function focusCameraOnObject(object) {
+            isFocusingCamera = true;
+            isResettingCamera = false;
+            
+            focusLookAtPosition.set(0, 0, 0);
+            
+            const direction = object.position.clone().normalize();
+            const distance = object.position.length() + 250;
+            
+            focusTargetPosition.copy(direction).multiplyScalar(distance);
+        }
+
+        function onNodeClick(event) {
+            const canvasBounds = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+            mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const allPoints = Array.from(docPoints.values()).concat(queryPoint ? [queryPoint] : []);
+            const intersects = raycaster.intersectObjects(allPoints);
+
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                selectObject(object);
+                focusCameraOnObject(object);
+            } else {
+                selectObject(null);
+            }
+        }
+
+        function onNodeHover(event) {
+            const canvasBounds = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1;
+            mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const allPoints = Array.from(docPoints.values()).concat(queryPoint ? [queryPoint] : []);
+            const intersects = raycaster.intersectObjects(allPoints);
+
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                if (hoveredObject !== object) {
+                    if (hoveredObject) {
+                        hoveredObject.children.find(c => c.isSprite).scale.set(hoveredObject.geometry.parameters.radius * 4, hoveredObject.geometry.parameters.radius * 4, 1);
+                    }
+                    hoveredObject = object;
+                    hoveredObject.children.find(c => c.isSprite).scale.set(hoveredObject.geometry.parameters.radius * 6, hoveredObject.geometry.parameters.radius * 6, 1);
+                }
+            } else {
+                if (hoveredObject) {
+                    hoveredObject.children.find(c => c.isSprite).scale.set(hoveredObject.geometry.parameters.radius * 4, hoveredObject.geometry.parameters.radius * 4, 1);
+                }
+                hoveredObject = null;
+            }
+        }
+
+        function selectObject(object) {
+            if (selectedObject) selectedObject.material.emissive.setHex(selectedObject.userData.originalEmissive);
+            clearSelectionHelper();
+            if (object) {
+                selectedObject = object;
+                object.material.emissive.setHex(HIGHLIGHT_COLOR);
+                displayNodeInfo(object.userData);
+                showSelectionHelper(object);
+            } else {
+                selectedObject = null;
+                clearNodeInfo();
+            }
+        }
+
+        function displayNodeInfo(userData) {
+            const detailsPanel = document.getElementById('node-details');
+            const vectorString = `[${userData.vector.join(', ')}]`;
+            detailsPanel.innerHTML = `
+                <h3>原始文本:</h3>
+                <div class="info-item">${userData.text}</div>
+                <h3>向量数据 (3维):</h3>
+                <div class="info-item">${vectorString}</div>
+            `;
+        }
+
+        function clearNodeInfo() {
+            document.getElementById('node-details').innerHTML = `<p><i>点击图中的一个节点以查看其详细信息。</i></p>`;
+        }
+
+        // --- 重置与清理 ---
+
+        function displayRAGResults(neighbors) {
+            const resultsPanel = document.getElementById('results-panel');
+            const queryText = queryPoint.userData.text;
+            const retrievedTexts = neighbors.map(n => n.point.userData.text);
+
+            const retrievedItemsHTML = retrievedTexts.map(text => `<div class="retrieved-item">${text}</div>`).join('');
+            const augmentedPrompt = `上下文：\n- ${retrievedTexts.join('\n- ')}\n\n问题：${queryText}`;
+            const generatedAnswer = `根据您提供的上下文，关于“${queryText}”的答案是：... (模拟LLM基于上下文生成) ...`;
+
+            resultsPanel.innerHTML = `
+                <h3>A. 检索 (Retrieve)</h3>
+                <p>在知识库中找到最相关的文档：</p>
+                ${retrievedItemsHTML}
+
+                <h3>B. 增强 (Augment)</h3>
+                <p>将问题和检索到的上下文组合成新提示：</p>
+                <div class="augmented-prompt"><pre>${augmentedPrompt}</pre></div>
+
+                <h3>C. 生成 (Generate)</h3>
+                <p>语言模型根据增强后的提示生成答案：</p>
+                <div class="generated-answer">${generatedAnswer}</div>
+            `;
+        }
+
+        function resetHighlights() {
+            selectObject(null);
+            if (queryPoint) {
+                scene.remove(queryPoint);
+                queryPoint = null;
+            }
+            while (linesGroup.children.length > 0) {
+                const child = linesGroup.children[0];
+                linesGroup.remove(child);
+                if(child.isMesh) {
+                    child.geometry.dispose();
+                    child.material.dispose();
+                }
+            }
+            linesToAnimate = [];
+            docPoints.forEach(point => {
+                point.material.color.set(DOC_COLOR);
+                point.material.emissive.set(0x000000);
+                point.userData.originalEmissive = 0x000000;
+            });
+            document.getElementById('results-panel').innerHTML = '<p><i>结果将显示在此处...</i></p>';
+            clearNodeInfo();
+        }
+
+        function resetScene() {
+            resetHighlights();
+            docPoints.forEach(point => {
+                docPointsGroup.remove(point);
+            });
+            docPoints.clear();
+            
+            const checkboxes = document.querySelectorAll('#knowledge-base input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+
+            document.getElementById('query-select').selectedIndex = 0;
+            resetCamera();
+        }
+
+        // --- 动画循环与窗口适配 ---
+
+        function handleCameraMovement(deltaTime) {
+            const moveSpeed = 500.0; // FIX: Reverted to a fixed manual move speed
+            const panVector = new THREE.Vector3();
+
+            if (keysPressed['w']) panVector.z -= 1;
+            if (keysPressed['s']) panVector.z += 1;
+            if (keysPressed['a']) panVector.x -= 1;
+            if (keysPressed['d']) panVector.x += 1;
+            if (keysPressed['q']) panVector.y -= 1;
+            if (keysPressed['e']) panVector.y += 1;
+
+            if(panVector.lengthSq() > 0) {
+                isResettingCamera = false; 
+                isFocusingCamera = false;
+                panVector.normalize().multiplyScalar(moveSpeed * deltaTime);
+                panVector.applyQuaternion(camera.quaternion);
+                camera.position.add(panVector);
+                controls.target.add(panVector);
+            }
+        }
+        
+        function updateLabelOcclusion() {
+            const allPoints = Array.from(docPoints.values()).concat(queryPoint ? [queryPoint] : []);
+            if (allPoints.length === 0) return;
+
+            const cameraPosition = new THREE.Vector3();
+            camera.getWorldPosition(cameraPosition);
+
+            for (const point of allPoints) {
+                const label = point.children.find(c => c.isCSS3DObject);
+                if (!label) continue;
+
+                const objectPosition = new THREE.Vector3();
+                point.getWorldPosition(objectPosition);
+                
+                const toObject = objectPosition.clone().sub(cameraPosition);
+                
+                const cameraDirection = new THREE.Vector3();
+                camera.getWorldDirection(cameraDirection);
+                if (cameraDirection.dot(toObject.normalize()) < 0) {
+                    label.element.style.visibility = 'hidden';
+                    continue;
+                }
+
+                const distanceToObject = objectPosition.distanceTo(cameraPosition);
+
+                const occluders = allPoints.filter(p => p !== point);
+                if (occluders.length === 0) {
+                    label.element.style.visibility = labelsVisible ? 'visible' : 'hidden';
+                    continue;
+                }
+
+                const direction = new THREE.Vector3().subVectors(objectPosition, cameraPosition).normalize();
+                raycaster.set(cameraPosition, direction);
+
+                const intersects = raycaster.intersectObjects(occluders, false);
+
+                let occluded = false;
+                if (intersects.length > 0) {
+                    if (intersects[0].object !== point && intersects[0].distance < distanceToObject) {
+                        occluded = true;
+                    }
+                }
+
+                if (occluded) {
+                    label.element.style.visibility = 'hidden';
+                } else {
+                    label.element.style.visibility = labelsVisible ? 'visible' : 'hidden';
+                }
+            }
+        }
+        
+        function updateLabelRotation() {
+            scene.traverse(function(object) {
+                if (object.isCSS3DObject) {
+                    object.quaternion.copy(camera.quaternion);
+                }
+            });
+        }
+        
+        const clock = new THREE.Clock();
+        function animate() {
+            const deltaTime = clock.getDelta();
+            requestAnimationFrame(animate);
+
+            handleCameraMovement(deltaTime);
+
+            if (isResettingCamera) {
+                camera.position.lerp(initialCameraPosition, focusAnimationSpeed); // FIX: Use animation speed
+                controls.target.lerp(initialControlsTarget, focusAnimationSpeed); // FIX: Use animation speed
+                if (camera.position.distanceTo(initialCameraPosition) < 0.1) {
+                    camera.position.copy(initialCameraPosition);
+                    controls.target.copy(initialControlsTarget);
+                    isResettingCamera = false;
+                }
+            } else if (isFocusingCamera) {
+                camera.position.lerp(focusTargetPosition, focusAnimationSpeed); // FIX: Use animation speed
+                controls.target.lerp(focusLookAtPosition, focusAnimationSpeed); // FIX: Use animation speed
+                if (camera.position.distanceTo(focusTargetPosition) < 0.1) {
+                    isFocusingCamera = false; 
+                }
+            }
+            
+            if (starField) {
+                starField.rotation.y += 0.0001;
+            }
+
+            controls.update();
+            updateLabelOcclusion();
+            updateLabelRotation();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            labelRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>

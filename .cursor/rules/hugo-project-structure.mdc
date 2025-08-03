@@ -1,0 +1,39 @@
+---
+alwaysApply: true
+description: Hugo博客项目结构指南
+---
+
+# Hugo博客项目结构指南
+
+这是一个基于Hugo的中文博客网站，使用Blowfish主题。
+
+## 核心目录结构
+
+- [config/](mdc:config/) - Hugo配置文件目录
+  - [hugo.toml](mdc:config/_default/hugo.toml) - 主配置文件
+  - [menus.toml](mdc:config/_default/menus.toml) - 菜单配置
+  - [markup.toml](mdc:config/_default/markup.toml) - Markdown渲染配置
+
+- [content/](mdc:content/) - 内容目录
+  - [posts/](mdc:content/posts/) - 博客文章目录
+  - [_index.md](mdc:content/_index.md) - 首页内容
+  - [about.md](mdc:content/about.md) - 关于页面
+
+- [themes/blowfish/](mdc:themes/blowfish/) - Blowfish主题文件
+
+- [layouts/](mdc:layouts/) - 自定义布局模板
+  - [shortcodes/](mdc:layouts/shortcodes/) - 短代码模板
+  - [partials/](mdc:layouts/partials/) - 部分模板
+
+- [static/](mdc:static/) - 静态资源文件
+
+- [assets/](mdc:assets/) - 需要处理的资源文件
+  - [img/](mdc:assets/img/) - 图片资源
+  - [js/](mdc:assets/js/) - JavaScript文件
+
+## 开发原则
+
+- 严格遵循MVVM架构模式
+- 优先考虑代码结构的清晰性和可读性
+- 所有注释和文档使用中文
+- 保持内容与展示分离的原则

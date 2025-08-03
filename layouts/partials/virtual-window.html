@@ -1,0 +1,112 @@
+{{/*
+虚拟窗口组件 - Virtual Window Component
+使用方法: {{ partial "virtual-window.html" (dict "id" "my-window" "title" "窗口标题" "icon" "🎯" "url" "/test.html" "width" "80%" "height" "70%") }}
+
+参数说明:
+- id: 窗口唯一标识符 (必需)
+- title: 窗口标题 (默认: "虚拟窗口")
+- icon: 窗口图标 (默认: "🪟")
+- url: 嵌入的页面URL (必需)
+- width: 初始宽度 (默认: "80%")
+- height: 初始高度 (默认: "70%")
+- minWidth: 最小宽度 (默认: "400px")
+- minHeight: 最小高度 (默认: "300px")
+- buttonText: 按钮文字 (默认: "打开虚拟窗口")
+- buttonStyle: 按钮样式类 (默认: "virtual-window-btn-default")
+- showBackdrop: 是否显示背景遮罩 (默认: true)
+*/}}
+
+{{ $id := .id | default (printf "virtual-window-%d" now.Unix) }}
+{{ $title := .title | default "虚拟窗口" }}
+{{ $icon := .icon | default "🪟" }}
+{{ $url := .url }}
+{{ $width := .width | default "80%" }}
+{{ $height := .height | default "70%" }}
+{{ $minWidth := .minWidth | default "400px" }}
+{{ $minHeight := .minHeight | default "300px" }}
+{{ $buttonText := .buttonText | default "🪟 打开虚拟窗口" }}
+{{ $buttonStyle := .buttonStyle | default "virtual-window-btn-default" }}
+{{ $showBackdrop := .showBackdrop | default false }}
+
+<!-- 虚拟窗口触发按钮 -->
+<button class="virtual-window-trigger {{ $buttonStyle }}" 
+        onclick="VirtualWindow.open('{{ $id }}')">
+    {{ $buttonText | safeHTML }}
+</button>
+
+<!-- 虚拟窗口容器 -->
+<div id="{{ $id }}" class="virtual-window" style="display: none;" 
+     data-initial-width="{{ $width }}" 
+     data-initial-height="{{ $height }}"
+     data-min-width="{{ $minWidth }}"
+     data-min-height="{{ $minHeight }}">
+    
+    <!-- 窗口标题栏 -->
+    <div class="virtual-window-titlebar">
+        <div class="virtual-window-title">
+            <span class="virtual-window-icon">{{ $icon | safeHTML }}</span>
+            <span class="virtual-window-text">{{ $title | safeHTML }}</span>
+        </div>
+        <div class="virtual-window-controls">
+            <button class="virtual-window-btn minimize-btn" 
+                    onclick="VirtualWindow.minimize('{{ $id }}')" 
+                    title="最小化">➖</button>
+            <button class="virtual-window-btn fullscreen-btn" 
+                    onclick="VirtualWindow.toggleFullscreen('{{ $id }}')" 
+                    title="全屏">⬜</button>
+            <button class="virtual-window-btn close-btn" 
+                    onclick="VirtualWindow.close('{{ $id }}')" 
+                    title="关闭">✕</button>
+        </div>
+    </div>
+
+    <!-- 拖拽覆盖层 -->
+    <div class="virtual-window-drag-overlay"></div>
+    
+    <!-- 窗口内容区域 -->
+    <div class="virtual-window-content">
+        {{ if $url }}
+            <!-- 加载指示器 -->
+            <div class="virtual-window-loader">
+                <div class="virtual-window-spinner"></div>
+                <div class="virtual-window-loader-text">内容加载中...</div>
+            </div>
+            <iframe class="virtual-window-iframe" 
+                    data-src="{{ $url | safeURL }}" 
+                    frameborder="0"
+                    title="{{ $title }}">
+            </iframe>
+        {{ else }}
+            <div class="virtual-window-error">
+                <div class="error-icon">⚠️</div>
+                <div class="error-title">配置错误</div>
+                <div class="error-message">未指定嵌入内容URL</div>
+            </div>
+        {{ end }}
+    </div>
+    
+    <!-- 调整大小手柄 -->
+    <div class="virtual-window-resize-handles">
+        <div class="virtual-window-resize-handle resize-n" data-direction="n"></div>
+        <div class="virtual-window-resize-handle resize-s" data-direction="s"></div>
+        <div class="virtual-window-resize-handle resize-e" data-direction="e"></div>
+        <div class="virtual-window-resize-handle resize-w" data-direction="w"></div>
+        <div class="virtual-window-resize-handle resize-ne" data-direction="ne"></div>
+        <div class="virtual-window-resize-handle resize-nw" data-direction="nw"></div>
+        <div class="virtual-window-resize-handle resize-se" data-direction="se"></div>
+        <div class="virtual-window-resize-handle resize-sw" data-direction="sw"></div>
+    </div>
+</div>
+
+<!-- 第一次使用时加载CSS和JS -->
+{{ if not (.skipAssets) }}
+{{ $needsAssets := true }}
+{{ if (.Site.Data.virtualWindowLoaded) }}
+    {{ $needsAssets = false }}
+{{ end }}
+
+{{ if $needsAssets }}
+    {{ partial "virtual-window-assets.html" . }}
+    {{ $.Site.SetData "virtualWindowLoaded" true }}
+{{ end }}
+{{ end }}

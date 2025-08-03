@@ -1,0 +1,1062 @@
+{{/* 虚拟窗口组件样式和脚本资源 */}}
+
+<!-- 虚拟窗口CSS样式 -->
+<style id="virtual-window-styles">
+/* ==========================================================================
+   虚拟窗口组件样式 - Virtual Window Component Styles
+   ========================================================================== */
+
+/* 触发按钮样式 */
+.virtual-window-trigger {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    border: 2px solid transparent;
+}
+
+.virtual-window-btn-default {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.virtual-window-btn-default:hover {
+    background: linear-gradient(135deg, #ee5a6f 0%, #dc4f64 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+}
+
+.virtual-window-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.virtual-window-btn-primary:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.virtual-window-btn-success {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    color: white;
+}
+
+.virtual-window-btn-success:hover {
+    background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+}
+
+/* 虚拟窗口主容器 */
+.virtual-window {
+    position: fixed;
+    /* 使用绝对定位，避免transform切换问题 */
+    left: 0;
+    top: 0;
+    width: 80%;
+    height: 70%;
+    min-width: 300px;
+    min-height: 30px;
+    max-width: 95vw;
+    max-height: 95vh;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    /* 移除不必要的过渡效果，动画由keyframes控制 */
+    transition: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 窗口状态样式 */
+.virtual-window.fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    left: 0 !important;
+    top: 0 !important;
+    transform: none !important;
+    border-radius: 0;
+    max-width: none;
+    max-height: none;
+}
+
+.virtual-window.minimized {
+    width: 300px !important;
+    height: 40px !important;
+    /* 位置将由JavaScript动态控制 */
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    top: auto;
+    transform: none !important;
+    /* 添加平滑过渡动画 */
+    transition: bottom 0.3s ease, right 0.3s ease, left 0.3s ease !important;
+    /* 确保最小化窗口在最上层 */
+    z-index: 10001 !important;
+}
+
+.virtual-window.minimized .virtual-window-content,
+.virtual-window.minimized .virtual-window-resize-handles {
+    display: none;
+}
+
+/* 最小化窗口标题栏优化 */
+.virtual-window.minimized .virtual-window-titlebar {
+    height: 100%; /* 占满整个最小化窗口 */
+    border-radius: 8px; /* 四角都圆润 */
+    cursor: pointer; /* 整个标题栏都可点击恢复 */
+}
+
+/* 最小化窗口标题文字优化 */
+.virtual-window.minimized .virtual-window-title {
+    font-size: 13px; /* 稍微小一点的字体 */
+    white-space: nowrap; /* 防止文字换行 */
+    overflow: hidden; /* 隐藏溢出 */
+    text-overflow: ellipsis; /* 显示省略号 */
+    max-width: 180px; /* 限制最大宽度，为按钮留空间 */
+}
+
+/* 最小化窗口控制按钮优化 */
+.virtual-window.minimized .virtual-window-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+}
+
+/* 最小化窗口悬停效果 */
+.virtual-window.minimized:hover {
+    transform: translateY(-2px); /* 轻微上浮效果 */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* 增强阴影 */
+}
+
+.virtual-window.minimized:hover .virtual-window-titlebar {
+    background: linear-gradient(135deg, #7c8ef0 0%, #8a5db2 100%); /* 稍微亮一点的渐变 */
+}
+
+/* 窗口标题栏 */
+.virtual-window-titlebar {
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 15px;
+    cursor: move;
+    user-select: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.virtual-window.fullscreen .virtual-window-titlebar {
+    border-radius: 0;
+}
+
+/* 拖拽覆盖层 */
+.virtual-window-drag-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    display: none;
+    cursor: move;
+}
+
+.virtual-window.is-dragging .virtual-window-drag-overlay {
+    display: block;
+}
+
+.virtual-window-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.virtual-window-icon {
+    font-size: 16px;
+}
+
+.virtual-window-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.virtual-window-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.virtual-window-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.close-btn:hover {
+    background: #ff5f57;
+}
+
+.minimize-btn:hover {
+    background: #ffbd2e;
+}
+
+.fullscreen-btn:hover {
+    background: #28ca42;
+}
+
+/* 窗口内容区域 */
+.virtual-window-content {
+    width: 100%;
+    height: calc(100% - 40px);
+    background: #f8f9fa;
+    position: relative;
+}
+
+/* 加载指示器样式 */
+.virtual-window-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+
+.virtual-window.is-loaded .virtual-window-loader {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.virtual-window-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #667eea;
+    border-radius: 50%;
+    animation: virtual-window-spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes virtual-window-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.virtual-window-loader-text {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.virtual-window-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: white;
+    /* 初始时透明，加载完成后显示 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.virtual-window.is-loaded .virtual-window-iframe {
+    opacity: 1;
+}
+
+/* 错误状态样式 */
+.virtual-window-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f8f9fa;
+    color: #6c757d;
+}
+
+.virtual-window-error .error-icon {
+    font-size: 3em;
+    margin-bottom: 1rem;
+}
+
+.virtual-window-error .error-title {
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #dc3545;
+}
+
+.virtual-window-error .error-message {
+    font-size: 1em;
+}
+
+/* 调整大小手柄 */
+.virtual-window-resize-handles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.virtual-window-resize-handle {
+    position: absolute;
+    pointer-events: all;
+    z-index: 10;
+}
+
+.resize-n, .resize-s {
+    left: 8px;
+    right: 8px;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.resize-n { top: 0; }
+.resize-s { bottom: 0; }
+
+.resize-e, .resize-w {
+    top: 8px;
+    bottom: 8px;
+    width: 8px;
+    cursor: ew-resize;
+}
+
+.resize-e { right: 0; }
+.resize-w { left: 0; }
+
+.resize-ne, .resize-nw, .resize-se, .resize-sw {
+    width: 8px;
+    height: 8px;
+}
+
+.resize-ne {
+    top: 0;
+    right: 0;
+    cursor: ne-resize;
+}
+
+.resize-nw {
+    top: 0;
+    left: 0;
+    cursor: nw-resize;
+}
+
+.resize-se {
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+}
+
+.resize-sw {
+    bottom: 0;
+    left: 0;
+    cursor: sw-resize;
+}
+
+/* 动画效果 */
+@keyframes virtualWindowOpen {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.virtual-window.opening {
+    animation: virtualWindowOpen 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 背景遮罩 */
+.virtual-window-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    backdrop-filter: blur(3px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .virtual-window {
+        width: 95% !important;
+        height: 90% !important;
+        min-width: 320px;
+        min-height: 250px;
+    }
+    
+    .virtual-window-titlebar {
+        height: 36px;
+        padding: 0 12px;
+    }
+    
+    .virtual-window-title {
+        font-size: 13px;
+    }
+    
+    .virtual-window-btn {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+    
+    .virtual-window-content {
+        height: calc(100% - 36px);
+    }
+    
+    .virtual-window.minimized {
+        width: 200px !important;
+        height: 36px !important;
+    }
+    
+    /* 移动端最小化窗口标题栏优化 */
+    .virtual-window.minimized .virtual-window-titlebar {
+        height: 100%;
+        padding: 0 10px; /* 移动端更小的内边距 */
+        border-radius: 6px; /* 移动端更小的圆角 */
+    }
+    
+    /* 移动端最小化窗口标题文字 */
+    .virtual-window.minimized .virtual-window-title {
+        font-size: 12px;
+        max-width: 120px; /* 移动端更小的最大宽度 */
+    }
+    
+    /* 移动端最小化窗口按钮 */
+    .virtual-window.minimized .virtual-window-btn {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+}
+
+/* 防止文本选择 */
+.virtual-window-titlebar,
+.virtual-window-controls,
+.virtual-window-resize-handles {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+</style>
+
+<!-- 虚拟窗口JavaScript -->
+<script id="virtual-window-script">
+/**
+ * 虚拟窗口管理器 - Virtual Window Manager
+ * 提供完整的窗口管理功能
+ */
+window.VirtualWindow = (function() {
+    'use strict';
+    
+    // 窗口状态管理
+    const windows = new Map();
+    const activeWindows = new Set();
+    
+    // 拖拽和调整大小状态
+    let isDragging = false;
+    let isResizing = false;
+    let currentWindow = null;
+    let currentResize = '';
+    let dragOffset = { x: 0, y: 0 };
+    let resizeData = {};
+    
+    // 最小化窗口管理
+    const minimizedWindows = new Set();
+    const MINIMIZED_WINDOW_WIDTH = 300;
+    const MINIMIZED_WINDOW_WIDTH_MOBILE = 200;
+    const MINIMIZED_WINDOW_MARGIN = 10;
+    
+    /**
+     * 初始化窗口事件监听器
+     */
+    function initGlobalEvents() {
+        // 鼠标移动事件
+        document.addEventListener('mousemove', handleMouseMove);
+        
+        // 鼠标释放事件
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // 键盘事件
+        document.addEventListener('keydown', handleKeyDown);
+        
+        // 窗口大小调整事件（响应式最小化窗口排列）
+        window.addEventListener('resize', function() {
+            // 防抖处理，避免频繁重排
+            clearTimeout(window.resizeTimeout);
+            window.resizeTimeout = setTimeout(() => {
+                rearrangeMinimizedWindows();
+            }, 100);
+        });
+        
+        // 防止选择文本
+        document.addEventListener('selectstart', function(e) {
+            if (isDragging || isResizing) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    /**
+     * 获取窗口状态
+     */
+    function getWindowState(windowId) {
+        return windows.get(windowId) || {
+            isFullscreen: false,
+            isMinimized: false,
+            position: { x: 0, y: 0 },
+            size: { width: 0, height: 0 }
+        };
+    }
+    
+    /**
+     * 设置窗口状态
+     */
+    function setWindowState(windowId, state) {
+        const currentState = getWindowState(windowId);
+        windows.set(windowId, { ...currentState, ...state });
+    }
+    
+    /**
+     * 计算窗口居中位置
+     */
+    function calculateCenterPosition(windowEl) {
+        const rect = windowEl.getBoundingClientRect();
+        const windowWidth = rect.width;
+        const windowHeight = rect.height;
+        
+        const left = Math.max(0, (window.innerWidth - windowWidth) / 2);
+        const top = Math.max(0, (window.innerHeight - windowHeight) / 2);
+        
+        return { left, top };
+    }
+    
+    /**
+     * 重新排列所有最小化窗口
+     */
+    function rearrangeMinimizedWindows() {
+        const minimizedArray = Array.from(minimizedWindows);
+        
+        if (minimizedArray.length === 0) return;
+        
+        // 检测是否为移动设备
+        const isMobile = window.innerWidth <= 768;
+        const windowWidth = isMobile ? MINIMIZED_WINDOW_WIDTH_MOBILE : MINIMIZED_WINDOW_WIDTH;
+        const totalWidth = windowWidth + MINIMIZED_WINDOW_MARGIN;
+        
+        // 计算可用空间
+        const availableWidth = window.innerWidth - 40; // 左右各20px边距
+        const maxWindowsPerRow = Math.floor(availableWidth / totalWidth);
+        
+        minimizedArray.forEach((windowId, index) => {
+            const windowEl = document.getElementById(windowId);
+            if (!windowEl || !windowEl.classList.contains('minimized')) return;
+            
+            // 计算当前窗口的行和列
+            const row = Math.floor(index / maxWindowsPerRow);
+            const col = index % maxWindowsPerRow;
+            
+            // 计算位置
+            const right = 20 + (col * totalWidth);
+            const bottom = 20 + (row * 50); // 每行间距50px
+            
+            // 应用位置
+            windowEl.style.right = right + 'px';
+            windowEl.style.bottom = bottom + 'px';
+            windowEl.style.left = 'auto';
+            windowEl.style.top = 'auto';
+        });
+    }
+    
+    /**
+     * 打开虚拟窗口
+     */
+    function openWindow(windowId) {
+        const windowEl = document.getElementById(windowId);
+        if (!windowEl || activeWindows.has(windowId)) return;
+        
+        const showBackdrop = windowEl.dataset.showBackdrop === 'true';
+
+        if (showBackdrop) {
+            // 创建背景遮罩
+            const backdrop = document.createElement('div');
+            backdrop.className = 'virtual-window-backdrop';
+            backdrop.dataset.windowId = windowId;
+            document.body.appendChild(backdrop);
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 设置初始尺寸
+        const initialWidth = windowEl.dataset.initialWidth || '80%';
+        const initialHeight = windowEl.dataset.initialHeight || '70%';
+        windowEl.style.width = initialWidth;
+        windowEl.style.height = initialHeight;
+        
+        // 关键修复：先设置为透明不可见
+        windowEl.style.opacity = '0';
+        windowEl.style.display = 'block';
+        
+        // 计算并设置居中位置
+        const centerPos = calculateCenterPosition(windowEl);
+        windowEl.style.left = centerPos.left + 'px';
+        windowEl.style.top = centerPos.top + 'px';
+        
+        // 应用打开动画，平滑显示
+        windowEl.classList.add('opening');
+        windowEl.style.opacity = '1';
+        
+        // 懒加载Iframe
+        const iframe = windowEl.querySelector('.virtual-window-iframe');
+        if (iframe && iframe.dataset.src) {
+            // 检查是否需要重新加载内容（首次加载或从about:blank恢复）
+            const needsReload = !iframe.src || iframe.src === 'about:blank' || iframe.src !== iframe.dataset.src;
+            if (needsReload) {
+                iframe.src = iframe.dataset.src;
+                iframe.onload = () => {
+                    windowEl.classList.add('is-loaded');
+                };
+            } else {
+                windowEl.classList.add('is-loaded');
+            }
+        } else if (iframe) {
+            windowEl.classList.add('is-loaded');
+        }
+
+        // 移除动画类
+        setTimeout(() => {
+            windowEl.classList.remove('opening');
+        }, 300);
+        
+        // 添加到活动窗口集合
+        activeWindows.add(windowId);
+        
+        // 初始化窗口事件
+        initWindowEvents(windowId);
+        
+        // 设置窗口状态
+        setWindowState(windowId, {
+            isFullscreen: false,
+            isMinimized: false
+        });
+        
+        // 聚焦窗口
+        focusWindow(windowId);
+    }
+    
+    /**
+     * 关闭虚拟窗口
+     */
+    function closeWindow(windowId) {
+        const windowEl = document.getElementById(windowId);
+        const backdrop = document.querySelector(`[data-window-id="${windowId}"]`);
+        
+        if (windowEl) {
+            windowEl.style.display = 'none';
+            windowEl.classList.remove('fullscreen', 'minimized', 'is-loaded');
+
+            // 释放iframe内存
+            const iframe = windowEl.querySelector('.virtual-window-iframe');
+            if (iframe) {
+                iframe.src = 'about:blank';
+            }
+        }
+        
+        if (backdrop) {
+            backdrop.remove();
+            
+            // 检查是否还有其他带背景的窗口
+            let anyBackdropLeft = false;
+            activeWindows.forEach(id => {
+                if (id === windowId) return;
+                const otherWindow = document.getElementById(id);
+                if (otherWindow && otherWindow.dataset.showBackdrop === 'true') {
+                    anyBackdropLeft = true;
+                }
+            });
+
+            if (!anyBackdropLeft) {
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // 从活动窗口集合中移除
+        activeWindows.delete(windowId);
+        
+        // 如果是最小化窗口，也要从最小化集合中移除
+        if (minimizedWindows.has(windowId)) {
+            minimizedWindows.delete(windowId);
+            // 重新排列剩余的最小化窗口
+            rearrangeMinimizedWindows();
+        }
+        
+        // 重置窗口状态
+        resetWindowStyle(windowEl);
+    }
+    
+    /**
+     * 最小化/恢复窗口（优化版本）
+     */
+    function minimizeWindow(windowId) {
+        const windowEl = document.getElementById(windowId);
+        const state = getWindowState(windowId);
+        
+        if (state.isMinimized) {
+            // 恢复窗口
+            windowEl.classList.remove('minimized');
+            setWindowState(windowId, { isMinimized: false });
+            
+            // 从最小化窗口集合中移除
+            minimizedWindows.delete(windowId);
+            
+            // 重新排列剩余的最小化窗口
+            rearrangeMinimizedWindows();
+        } else {
+            // 最小化窗口
+            windowEl.classList.remove('fullscreen');
+            windowEl.classList.add('minimized');
+            setWindowState(windowId, { 
+                isMinimized: true,
+                isFullscreen: false 
+            });
+            
+            // 添加到最小化窗口集合
+            minimizedWindows.add(windowId);
+            
+            // 重新排列所有最小化窗口
+            rearrangeMinimizedWindows();
+        }
+    }
+    
+    /**
+     * 切换全屏模式
+     */
+    function toggleFullscreen(windowId) {
+        const windowEl = document.getElementById(windowId);
+        const state = getWindowState(windowId);
+        
+        if (state.isFullscreen) {
+            // 退出全屏
+            windowEl.classList.remove('fullscreen');
+            setWindowState(windowId, { isFullscreen: false });
+        } else {
+            // 进入全屏
+            windowEl.classList.remove('minimized');
+            windowEl.classList.add('fullscreen');
+            setWindowState(windowId, { 
+                isFullscreen: true,
+                isMinimized: false 
+            });
+        }
+    }
+    
+    /**
+     * 聚焦窗口
+     */
+    function focusWindow(windowId) {
+        // 将当前窗口置于最上层
+        const windowEl = document.getElementById(windowId);
+        if (windowEl) {
+            windowEl.style.zIndex = 10000 + activeWindows.size;
+        }
+    }
+    
+    /**
+     * 初始化单个窗口的事件监听器
+     */
+    function initWindowEvents(windowId) {
+        const windowEl = document.getElementById(windowId);
+        const titlebar = windowEl.querySelector('.virtual-window-titlebar');
+        const resizeHandles = windowEl.querySelectorAll('.virtual-window-resize-handle');
+        
+        // 拖拽事件
+        titlebar.addEventListener('mousedown', function(e) {
+            startDrag(windowId, e);
+        });
+        
+        // 双击标题栏智能操作
+        titlebar.addEventListener('dblclick', function() {
+            const state = getWindowState(windowId);
+            if (state.isMinimized) {
+                // 如果是最小化状态，双击恢复窗口
+                minimizeWindow(windowId);
+            } else {
+                // 如果是正常状态，双击切换全屏
+                toggleFullscreen(windowId);
+            }
+        });
+        
+        // 调整大小事件
+        resizeHandles.forEach(handle => {
+            handle.addEventListener('mousedown', function(e) {
+                startResize(windowId, e, handle.dataset.direction);
+            });
+        });
+        
+        // 窗口点击事件（聚焦）
+        windowEl.addEventListener('mousedown', function() {
+            focusWindow(windowId);
+        });
+    }
+    
+    /**
+     * 开始拖拽（重构版本）
+     */
+    function startDrag(windowId, e) {
+        // 如果点击的是窗口控制按钮，则不触发拖拽
+        if (e.target.closest('.virtual-window-controls')) {
+            return;
+        }
+
+        const state = getWindowState(windowId);
+        if (state.isFullscreen || state.isMinimized) return;
+        
+        const windowEl = document.getElementById(windowId);
+        windowEl.classList.add('is-dragging');
+        
+        // 获取当前窗口的实际位置（已经是绝对定位，无需转换）
+        const rect = windowEl.getBoundingClientRect();
+        
+        isDragging = true;
+        currentWindow = windowId;
+        dragOffset.x = e.clientX - rect.left;
+        dragOffset.y = e.clientY - rect.top;
+        
+        e.preventDefault();
+    }
+    
+    /**
+     * 开始调整大小
+     */
+    function startResize(windowId, e, direction) {
+        const state = getWindowState(windowId);
+        if (state.isFullscreen || state.isMinimized) return;
+        
+        const windowEl = document.getElementById(windowId);
+        windowEl.classList.add('is-dragging');
+        const rect = windowEl.getBoundingClientRect();
+        
+        isResizing = true;
+        currentWindow = windowId;
+        currentResize = direction;
+        
+        resizeData = {
+            startX: e.clientX,
+            startY: e.clientY,
+            startWidth: rect.width,
+            startHeight: rect.height,
+            startLeft: rect.left,
+            startTop: rect.top,
+            minWidth: parseInt(windowEl.dataset.minWidth) || 400,
+            minHeight: parseInt(windowEl.dataset.minHeight) || 300
+        };
+        
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    /**
+     * 处理鼠标移动
+     */
+    function handleMouseMove(e) {
+        if (isDragging && currentWindow) {
+            handleDrag(e);
+        } else if (isResizing && currentWindow) {
+            handleResize(e);
+        }
+    }
+    
+    /**
+     * 处理拖拽移动
+     */
+    function handleDrag(e) {
+        if (!isDragging || !currentWindow) return;
+
+        window.requestAnimationFrame(() => {
+            const windowEl = document.getElementById(currentWindow);
+            if (!windowEl) return;
+            
+            const newLeft = e.clientX - dragOffset.x;
+            const newTop = e.clientY - dragOffset.y;
+            
+
+            // 移除边界检查，允许窗口自由拖动
+            windowEl.style.left = newLeft + 'px';
+            windowEl.style.top = newTop + 'px';
+        });
+    }
+    
+    /**
+     * 处理调整大小
+     */
+    function handleResize(e) {
+        if (!isResizing || !currentWindow) return;
+
+        window.requestAnimationFrame(() => {
+            const windowEl = document.getElementById(currentWindow);
+            if (!windowEl) return;
+            
+            const deltaX = e.clientX - resizeData.startX;
+            const deltaY = e.clientY - resizeData.startY;
+            
+            let newWidth = resizeData.startWidth;
+            let newHeight = resizeData.startHeight;
+            let newLeft = resizeData.startLeft;
+            let newTop = resizeData.startTop;
+            
+            // 根据调整方向计算新尺寸
+            if (currentResize.includes('e')) {
+                newWidth = Math.max(resizeData.minWidth, resizeData.startWidth + deltaX);
+            }
+            if (currentResize.includes('w')) {
+                newWidth = Math.max(resizeData.minWidth, resizeData.startWidth - deltaX);
+                newLeft = resizeData.startLeft + (resizeData.startWidth - newWidth);
+            }
+            if (currentResize.includes('s')) {
+                newHeight = Math.max(resizeData.minHeight, resizeData.startHeight + deltaY);
+            }
+            if (currentResize.includes('n')) {
+                newHeight = Math.max(resizeData.minHeight, resizeData.startHeight - deltaY);
+                newTop = resizeData.startTop + (resizeData.startHeight - newHeight);
+            }
+            
+            // 边界检查
+            if (newLeft < 0) {
+                newWidth += newLeft;
+                newLeft = 0;
+            }
+            if (newTop < 0) {
+                newHeight += newTop;
+                newTop = 0;
+            }
+            if (newLeft + newWidth > window.innerWidth) {
+                newWidth = window.innerWidth - newLeft;
+            }
+            if (newTop + newHeight > window.innerHeight) {
+                newHeight = window.innerHeight - newTop;
+            }
+            
+            // 应用新尺寸
+            windowEl.style.width = newWidth + 'px';
+            windowEl.style.height = newHeight + 'px';
+            windowEl.style.left = newLeft + 'px';
+            windowEl.style.top = newTop + 'px';
+            windowEl.style.transform = 'none';
+        });
+    }
+    
+    /**
+     * 处理鼠标释放
+     */
+    function handleMouseUp() {
+        if (isDragging && currentWindow) {
+            const windowEl = document.getElementById(currentWindow);
+            if(windowEl) windowEl.classList.remove('is-dragging');
+            isDragging = false;
+            currentWindow = null;
+        }
+        
+        if (isResizing && currentWindow) {
+            const windowEl = document.getElementById(currentWindow);
+            if(windowEl) windowEl.classList.remove('is-dragging');
+            isResizing = false;
+            currentWindow = null;
+            currentResize = '';
+            resizeData = {};
+        }
+    }
+    
+    /**
+     * 处理键盘事件
+     */
+    function handleKeyDown(e) {
+        if (activeWindows.size === 0) return;
+        
+        // 只处理有活动窗口时的快捷键
+        if (e.key === 'Escape') {
+            // ESC关闭最后打开的窗口
+            const lastWindow = Array.from(activeWindows).pop();
+            if (lastWindow) closeWindow(lastWindow);
+        } else if (e.key === 'F11') {
+            e.preventDefault();
+            // F11切换全屏
+            const lastWindow = Array.from(activeWindows).pop();
+            if (lastWindow) toggleFullscreen(lastWindow);
+        } else if (e.ctrlKey && e.key === 'm') {
+            e.preventDefault();
+            // Ctrl+M最小化
+            const lastWindow = Array.from(activeWindows).pop();
+            if (lastWindow) minimizeWindow(lastWindow);
+        }
+    }
+    
+    /**
+     * 重置窗口样式（重构版本）
+     */
+    function resetWindowStyle(windowEl) {
+        if (!windowEl) return;
+        
+        // 重置为隐藏状态，保持CSS默认定位
+        windowEl.style.display = 'none';
+        windowEl.style.opacity = '';
+        windowEl.style.visibility = '';
+        windowEl.style.left = '';
+        windowEl.style.top = '';
+        windowEl.style.width = '';
+        windowEl.style.height = '';
+        windowEl.classList.remove('fullscreen', 'minimized', 'opening', 'is-dragging', 'is-loaded');
+    }
+    
+    // 初始化全局事件监听器
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGlobalEvents);
+    } else {
+        initGlobalEvents();
+    }
+    
+    // 公开API
+    return {
+        open: openWindow,
+        close: closeWindow,
+        minimize: minimizeWindow,
+        toggleFullscreen: toggleFullscreen,
+        focus: focusWindow,
+        getState: getWindowState,
+        getActiveWindows: () => Array.from(activeWindows)
+    };
+})();
+</script>

@@ -1,0 +1,88 @@
+---
+alwaysApply: true
+description: 中文内容和代码规范
+---
+
+# 中文内容和代码规范
+
+## 语言使用规范
+
+### 1. 内容语言
+- **博客文章**：全部使用中文撰写
+- **注释**：所有代码注释必须使用中文
+- **文档**：技术文档和说明使用中文
+- **专业术语**：首次出现时可中英文并列，后续使用中文
+
+### 2. 标点符号
+- 使用中文标点符号（。，！？：；）
+- 英文内容使用英文标点符号
+- 数字与中文之间添加空格
+- 代码与中文之间添加空格
+
+## 代码注释规范
+
+### JavaScript/TypeScript
+```javascript
+// 初始化用户配置数据
+function initUserConfig() {
+    // 从本地存储加载配置
+    const config = localStorage.getItem('userConfig');
+    
+    // 验证配置数据的有效性
+    if (validateConfig(config)) {
+        return JSON.parse(config);
+    }
+    
+    // 返回默认配置
+    return getDefaultConfig();
+}
+```
+
+### HTML注释
+```html
+<!-- 博客文章列表容器 -->
+<div class="post-list">
+    <!-- 文章卡片组件 -->
+    <article class="post-card">
+        <!-- 文章标题 -->
+        <h2 class="post-title">{{ .Title }}</h2>
+    </article>
+</div>
+```
+
+### CSS注释
+```css
+/* 主页横幅样式 */
+.hero-banner {
+    /* 设置背景渐变 */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    /* 响应式高度设置 */
+    height: 60vh;
+    min-height: 400px;
+}
+```
+
+## MVVM架构原则
+
+### 视图层 (View)
+- 只负责数据展示和用户交互
+- 不包含业务逻辑
+- 通过数据绑定与ViewModel通信
+
+### 视图模型层 (ViewModel)
+- 处理视图逻辑和用户输入
+- 数据转换和格式化
+- 调用Model层获取数据
+
+### 模型层 (Model)
+- 纯数据和业务逻辑
+- 不依赖于视图层
+- 提供数据访问接口
+
+## 文件命名规范
+
+- **文章目录**：使用英文短横线命名（kebab-case）
+- **图片文件**：描述性英文命名，如 `rag-architecture.svg`
+- **配置文件**：遵循Hugo约定，如 `hugo.toml`
+- **模板文件**：使用英文命名，添加中文注释说明用途
